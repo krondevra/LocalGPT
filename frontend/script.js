@@ -31,12 +31,71 @@ document.getElementById("openLogin").addEventListener("click", function(){
     showLogin();
 });
 
-document.getElementById("loginSubmit").addEventListener("click", function(){
-    loginMessage.textContent = "placeholder";
+document.getElementById("loginSubmit").addEventListener("click", async function(){
+    clearMessages();
+
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+
+    if (!u || !p) {
+        loginMessage.textContent = "Enter username and password.";
+        return;
+    }
+
+    const form = new FormData();
+    form.append("username", u);
+    form.append("password", p);
+
+    try {
+        const res = await fetch("/auth/login", {
+            method: "POST",
+            body: form
+        });
+
+        if (!res.ok) {
+            loginMessage.textContent = "Login failed.";
+            return;
+        }
+
+        loginMessage.textContent = "Logged in.";
+        document.getElementById("loginPassword").value = "";
+    } catch (e) {
+        loginMessage.textContent = "Network error.";
+    }
 });
 
-document.getElementById("signupSubmit").addEventListener("click", function(){
-    signupMessage.textContent = "placeholder";
+document.getElementById("signupSubmit").addEventListener("click", async function(){
+    clearMessages();
+
+    const u = document.getElementById("signupUsername").value.trim();
+    const p = document.getElementById("signupPassword").value.trim();
+
+    if (!u || !p) {
+        signupMessage.textContent = "Enter username and password.";
+        return;
+    }
+
+    const form = new FormData();
+    form.append("username", u);
+    form.append("password", p);
+
+    try {
+        const res = await fetch("/auth/register", {
+            method: "POST",
+            body: form
+        });
+
+        if (!res.ok) {
+            signupMessage.textContent = "Signup failed.";
+            return;
+        }
+
+        showLogin();
+        document.getElementById("loginUsername").value = u;
+        loginMessage.textContent = "Account created.";
+    } catch (e) {
+        signupMessage.textContent = "Network error.";
+    }
 });
 
 showLogin();
