@@ -10,8 +10,10 @@ from .database import get_db, User
 # router /auth
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-# jwt secret key (REPLACE!)
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-key")
+# jwt secret key
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is not set. Export SECRET_KEY before running.")
 ALGO = "HS256"
 MAX_BCRYPT_LEN = 72
 

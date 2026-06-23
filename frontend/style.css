@@ -392,3 +392,42 @@ body {
 .msg-bot th {
     background: #2a2a2a;
 }
+
+@media (max-width: 768px) {
+  /* Auth pages */
+  .auth-box {
+    width: 90%;
+    max-width: 360px;
+  }
+
+  /* App layout */
+  .app-main {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #333333;
+  }
+
+  .chat-area {
+    padding: 10px;
+  }
+
+  .chat-messages {
+    font-size: 13px;
+  }
+
+  .msg {
+    max-width: 90%;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    gap: 6px;
+    height: auto;
+    padding: 8px 12px;
+  }
+}
