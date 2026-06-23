@@ -99,3 +99,18 @@ def me(u: User = Depends(current_user)):
 def list_users(_: User = Depends(admin_user), db: Session = Depends(get_db)):
     users = db.query(User).order_by(User.id.asc()).all()
     return [{"id": u.id, "name": u.username, "admin": u.is_admin} for u in users]
+
+@router.delete("/users/id/delete", status_code=204)
+def delete_user(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)):
+    user_to_delete = db.get(User, user_id)
+    if not user_to_delete:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # count total admins
+    total_admins = db.query(User).filter_by(is_admin=True).count()
+    # prevent deleting if user is admin and only one admin exists
+    if user_to_delete.is_admin and total_admins == 1:
+        raise HTTPException(status_code=403, detail="Can't delete the only admin")
+
+    db.delete(user_to_delete)
+    db.commit()
