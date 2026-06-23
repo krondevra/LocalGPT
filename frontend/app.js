@@ -74,7 +74,7 @@ window.addEventListener("DOMContentLoaded", () => {
         messages.forEach(m => {
             const div = document.createElement("div");
             div.className = "msg " + (m.role === "user" ? "msg-user" : "msg-bot");
-            div.textContent = m.content;
+            div.innerHTML = marked.parse(m.content);
             chatMessages.appendChild(div);
         });
 
@@ -148,7 +148,8 @@ sendBtn.onclick = async () => {
         }
 
         const data = await res.json();
-        typing.textContent = data.assistant;
+        typing.innerHTML = marked.parse(data.assistant);
+
 
         // optional: autoscroll to bottom
         chatMessages.scrollTop = chatMessages.scrollHeight;

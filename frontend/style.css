@@ -344,3 +344,51 @@ body {
 .red-btn:hover {
     background: #c44545;
 }
+
+.msg-bot p {
+    margin: 0 0 6px 0;
+}
+
+.msg-bot ul, .msg-bot ol {
+    padding-left: 18px;
+    margin: 6px 0;
+}
+
+.msg-bot li {
+    margin-bottom: 4px;
+}
+
+.msg-bot strong {
+    font-weight: 600;
+}
+
+.msg-bot code {
+    background: #1b1b1b;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+}
+
+.msg-bot pre {
+    background: #1b1b1b;
+    padding: 10px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 13px;
+}
+
+.msg-bot table {
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 13px;
+}
+
+.msg-bot th, .msg-bot td {
+    border: 1px solid #444;
+    padding: 6px 8px;
+}
+
+.msg-bot th {
+    background: #2a2a2a;
+}
