@@ -14,10 +14,16 @@ async def send_to_lmstudio(message: str):
     payload = {
         "messages": [{"role": "user", "content": message}],
     }
-    async with httpx.AsyncClient() as client:
-        response = await client.post(LM_API_URL, json=payload)
-        response.raise_for_status()
-        return response.json()
+    timeout = httpx.Timeout(60.0, connect=10.0)
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            response = await client.post(LM_API_URL, json=payload)
+            response.raise_for_status()
+            return response.json()
+    except httpx.ReadTimeout:
+        raise HTTPException(status_code=504, detail="LM Studio did not respond in time")
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"LM Studio request failed: {exc}")
 
 # Route to create a new chat
 @router.post("/create_chat")
