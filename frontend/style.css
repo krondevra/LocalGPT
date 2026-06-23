@@ -159,7 +159,6 @@ body {
 /* Navbar for app page */
 .app-navbar {
     height: 56px;
-
     border-bottom: 1px solid #3c3c3c;
     display: flex;
     align-items: center;

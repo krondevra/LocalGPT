@@ -7,7 +7,6 @@
     <meta name="description" content="LocalGPT — Local chat UI with authentication and chat history.">
     <meta property="og:title" content="LocalGPT">
     <meta property="og:description" content="LocalGPT — Local chat UI with authentication and chat history.">
-
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -17,7 +16,6 @@
         <div id="userDisplay">Logged in as ...</div>
         <button class="btn btn-small" id="logoutBtn">Log out</button>
     </div>
-    <script src="/static/app.js"></script>
 
     <div class="app-main">
     <div class="sidebar">
@@ -29,18 +27,10 @@
                 <button class="icon-btn red-btn" id="deleteChatBtn">−</button>
             </div>
         </div>
-
-        <ul class="chat-list" id="chatList">
-            <li class="chat-item selected">Chat 1</li>
-            <li class="chat-item">Chat 2</li>
-        </ul>
+    <ul class="chat-list" id="chatList"></ul>
     </div>
-
     <div class="chat-area">
-        <div class="chat-messages" id="chatMessages">
-            <div class="msg msg-user">User message placeholder.</div>
-            <div class="msg msg-bot">Assistant reply placeholder.</div>
-        </div>
+        <div class="chat-messages" id="chatMessages"></div>
 
         <div class="chat-input-row">
             <textarea id="chatInput" placeholder="Type a message..." rows="2"></textarea>
@@ -48,5 +38,7 @@
         </div>
     </div>
 </div>
+
+<script src="/static/app.js"></script>
 </body>
 </html>

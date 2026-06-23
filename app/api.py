@@ -1,19 +1,23 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 import httpx
+import os
 from .database import get_db, User, Chat, Message
 from .auth import current_user
 
 LM_API_URL = "http://127.0.0.1:1234/v1/chat/completions"  # LM Studio API URL
+LM_MODEL   = os.getenv("LM_MODEL", "openai/gpt-oss-20b@mxfp4")
 
 # Create a new router for chat-related endpoints
 router = APIRouter(prefix="/api", tags=["Chat"])
 
 # Function to send messages to LM Studio API
-async def send_to_lmstudio(message: str):
+async def send_to_lmstudio(messages):
     payload = {
-        "messages": [{"role": "user", "content": message}],
+        "model": LM_MODEL,
+        "messages": messages,
     }
+
     timeout = httpx.Timeout(60.0, connect=10.0)
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
@@ -36,28 +40,57 @@ async def create_chat(db: Session = Depends(get_db), user: User = Depends(curren
     return {"chat_id": new_chat.id, "message": "Chat created successfully"}
 
 # Route to select a chat, send a message, and get a response
-@router.post("/select_chat/id")
-async def select_chat(chat_id: int, message: str, db: Session = Depends(get_db), user: User = Depends(current_user)):
-    # Get the selected chat
-    chat = db.query(Chat).filter(Chat.id == chat_id, Chat.user_id == user.id).first()
-
+@router.post("/chats/{chat_id}/send")
+async def send_message(
+    chat_id: int,
+    message: str = Query(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(current_user)
+):
+    chat = db.query(Chat).filter_by(id=chat_id, user_id=user.id).first()
     if not chat:
         raise HTTPException(status_code=404, detail="Chat not found or not associated with the user")
 
-    # Save the message in the chat
-    new_message = Message(chat_id=chat.id, content=message)
-    db.add(new_message)
+    # save user message
+    user_msg = Message(chat_id=chat.id, role="user", content=message)
+    db.add(user_msg)
     db.commit()
-    db.refresh(new_message)
 
-    # Send the message to LM Studio and get a response
-    lmstudio_response = await send_to_lmstudio(message)
+    # build history
+    history = [
+        {"role": m.role, "content": m.content}
+        for m in chat.messages
+    ]
+
+    # send to LM Studio
+    lm_response = await send_to_lmstudio(history)
+    reply = lm_response["choices"][0]["message"]["content"]
+
+    # save assistant message
+    bot_msg = Message(chat_id=chat.id, role="assistant", content=reply)
+    db.add(bot_msg)
+    db.commit()
 
     return {
-        "chat_id": chat.id,
-        "message": new_message.content,
-        "response": lmstudio_response.get("choices")[0].get("message").get("content")
+        "user": message,
+        "assistant": reply
     }
+
+@router.get("/chats")
+def list_chats(db: Session = Depends(get_db), user: User = Depends(current_user)):
+    chats = db.query(Chat).filter_by(user_id=user.id).all()
+    return [{"id": c.id} for c in chats]
+
+@router.get("/chats/{chat_id}/messages")
+def get_messages(chat_id: int, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    chat = db.query(Chat).filter_by(id=chat_id, user_id=user.id).first()
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found or not associated with the user")
+
+    return [
+        {"role": m.role, "content": m.content}
+        for m in chat.messages
+    ]
 
 # Route to delete a chat
 @router.delete("/delete_chat/id", status_code=204)

@@ -7,7 +7,8 @@ from typing import Generator
 DB_PATH = Path(__file__).parent / "localgpt.db"
 
 # engine + local db factory
-engine = create_engine(f"sqlite:///{DB_PATH}")
+engine = create_engine(f"sqlite:///{DB_PATH}", connect_args={"check_same_thread": False})
+
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 # orm base class
@@ -38,18 +39,21 @@ class Chat(Base):
     __tablename__ = "chats"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User", back_populates="chats")
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    messages = relationship("Message", back_populates="chat")
+    user = relationship("User", back_populates="chats")
+    messages = relationship("Message", back_populates="chat", cascade="all, delete-orphan")
 
 # message table
 class Message(Base):
     __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True, index=True)
-    chat_id = Column(Integer, ForeignKey("chats.id"))
-    content = Column(String, index=True)
+
+    chat_id = Column(Integer, ForeignKey("chats.id"), nullable=False)
+
+    role = Column(String, nullable=False)   # "user" or "assistant"
+    content = Column(String, nullable=False)
 
     chat = relationship("Chat", back_populates="messages")
 
