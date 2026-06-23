@@ -54,6 +54,11 @@ def admin_user(u: User = Depends(current_user)) -> User:
         raise HTTPException(403, "for admin")
     return u
 
+# ----------------------- Helper -------------------------
+
+def _admins_count(db: Session) -> int:
+    return db.query(User).filter_by(is_admin=True).count()
+
 # ---------------------- Auth routes ---------------------
 
 @router.post("/register")
@@ -107,10 +112,31 @@ def delete_user(user_id: int, _: User = Depends(admin_user), db: Session = Depen
         raise HTTPException(status_code=404, detail="User not found")
 
     # count total admins
-    total_admins = db.query(User).filter_by(is_admin=True).count()
-    # prevent deleting if user is admin and only one admin exists
+    total_admins = _admins_count(db)
     if user_to_delete.is_admin and total_admins == 1:
         raise HTTPException(status_code=403, detail="Can't delete the only admin")
 
     db.delete(user_to_delete)
+    db.commit()
+
+@router.post("/users/id/promote", status_code=204)
+def promote_user(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)):
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.is_admin:
+        return  # already admin
+    user.is_admin = True
+    db.commit()
+
+@router.post("/users/id/demote", status_code=204)
+def demote_user(user_id: int, _: User = Depends(admin_user), db: Session = Depends(get_db)):
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.is_admin and _admins_count(db) <= 1:
+        raise HTTPException(status_code=403, detail="Can't demote the last admin")
+
+    user.is_admin = False
     db.commit()
