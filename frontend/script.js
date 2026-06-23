@@ -57,12 +57,21 @@ document.getElementById("loginSubmit").addEventListener("click", async function(
             return;
         }
 
-        loginMessage.textContent = "Logged in.";
-        document.getElementById("loginPassword").value = "";
+        try {
+            const data = await res.json();
+            if (data && data.access_token) {
+                localStorage.setItem("localgpt_token", data.access_token);
+            }
+        } catch (_) {
+            // ignore json errors for now
+        }
+
+        window.location.href = "/app";
     } catch (e) {
         loginMessage.textContent = "Network error.";
     }
 });
+
 
 document.getElementById("signupSubmit").addEventListener("click", async function(){
     clearMessages();

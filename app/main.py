@@ -15,5 +15,9 @@ app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 async def serve_index():
     return FileResponse(FRONTEND_DIR / "index.html")
 
+@app.get("/app", include_in_schema=False)
+async def serve_app():
+    return FileResponse(FRONTEND_DIR / "app.html")
+
 app.include_router(auth_router)
 app.include_router(api_router)

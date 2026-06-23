@@ -142,3 +142,9 @@ body {
 .link-btn:hover {
     text-decoration: underline;
 }
+
+/* App page */
+.app-wrapper {
+    padding: 24px;
+    color: #ffffff;
+}
