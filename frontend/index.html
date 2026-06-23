@@ -11,6 +11,63 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>LocalGPT</h1>
+<div class="topbar">
+    <div class="topbar-title">LocalGPT</div>
+</div>
+
+<div class="auth-wrapper">
+    <div class="auth-box" id="loginBox">
+        <h2 class="auth-title">Log in</h2>
+
+        <div class="auth-field">
+            <label for="loginUsername">Username</label>
+            <input type="text" id="loginUsername" autocomplete="username">
+        </div>
+
+        <div class="auth-field">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" autocomplete="current-password">
+        </div>
+
+        <div class="auth-message" id="loginMessage">placeholder</div>
+
+        <div class="auth-buttons-row">
+            <button class="btn btn-primary" id="loginSubmit">Log in</button>
+        </div>
+
+        <div class="auth-switch">
+            <span>Don't have an account?</span>
+            <button class="link-btn" id="openSignup">Sign up</button>
+        </div>
+    </div>
+
+    <div class="auth-box hidden" id="signupBox">
+        <h2 class="auth-title">Sign up</h2>
+
+        <div class="auth-field">
+            <label for="signupUsername">Username</label>
+            <input type="text" id="signupUsername" autocomplete="username">
+        </div>
+
+        <div class="auth-field">
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword" autocomplete="new-password">
+        </div>
+
+        <div class="auth-message" id="signupMessage">placeholder</div>
+
+        <div class="auth-buttons-row">
+            <button class="btn btn-primary" id="signupSubmit">Create account</button>
+        </div>
+
+        <div class="auth-switch">
+            <span>Already have an account?</span>
+            <button class="link-btn" id="openLogin">Log in</button>
+        </div>
+    </div>
+</div>
+
+<script src="/static/script.js"></script>
+
 </body>
 </html>
