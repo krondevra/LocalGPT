@@ -1,12 +1,16 @@
 const loginBox = document.getElementById("loginBox");
 const signupBox = document.getElementById("signupBox");
-
 const loginMessage = document.getElementById("loginMessage");
 const signupMessage = document.getElementById("signupMessage");
 
 function clearMessages() {
     loginMessage.textContent = "";
     signupMessage.textContent = "";
+}
+
+function getErrorMessage(data, fallback) {
+    if (data && typeof data.detail === "string") return data.detail;
+    return fallback;
 }
 
 function showLogin() {
@@ -23,81 +27,91 @@ function showSignup() {
     document.getElementById("signupUsername").focus();
 }
 
-document.getElementById("openSignup").addEventListener("click", function(){
-    showSignup();
-});
+async function readJsonSafely(response) {
+    try {
+        return await response.json();
+    } catch (_) {
+        return null;
+    }
+}
 
-document.getElementById("openLogin").addEventListener("click", function(){
-    showLogin();
-});
-
-document.getElementById("loginSubmit").addEventListener("click", async function(){
+async function login() {
     clearMessages();
 
-    const u = document.getElementById("loginUsername").value.trim();
-    const p = document.getElementById("loginPassword").value.trim();
+    const username = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value;
 
-    if (!u || !p) {
+    if (!username || !password) {
         loginMessage.textContent = "Enter username and password.";
         return;
     }
 
     const form = new FormData();
-    form.append("username", u);
-    form.append("password", p);
+    form.append("username", username);
+    form.append("password", password);
 
     try {
-        const res = await fetch("/auth/login", {
-            method: "POST",
-            body: form
-        });
+        const response = await fetch("/auth/login", { method: "POST", body: form });
+        const data = await readJsonSafely(response);
 
-        if (!res.ok) {
-            loginMessage.textContent = "Login failed.";
+        if (!response.ok) {
+            loginMessage.textContent = getErrorMessage(data, "Login failed.");
             return;
         }
 
-        const data = await res.json();
-        // save token
         localStorage.setItem("token", data.access_token);
-
         window.location.href = "/app";
-    } catch (e) {
-        loginMessage.textContent = "Network error.";
+    } catch (_) {
+        loginMessage.textContent = "Network error. Check that the backend is running.";
     }
-});
+}
 
-document.getElementById("signupSubmit").addEventListener("click", async function(){
+async function signup() {
     clearMessages();
 
-    const u = document.getElementById("signupUsername").value.trim();
-    const p = document.getElementById("signupPassword").value.trim();
+    const username = document.getElementById("signupUsername").value.trim();
+    const password = document.getElementById("signupPassword").value;
 
-    if (!u || !p) {
+    if (!username || !password) {
         signupMessage.textContent = "Enter username and password.";
         return;
     }
 
     const form = new FormData();
-    form.append("username", u);
-    form.append("password", p);
+    form.append("username", username);
+    form.append("password", password);
 
     try {
-        const res = await fetch("/auth/register", {
-            method: "POST",
-            body: form
-        });
+        const response = await fetch("/auth/register", { method: "POST", body: form });
+        const data = await readJsonSafely(response);
 
-        if (!res.ok) {
-            signupMessage.textContent = "Signup failed.";
+        if (!response.ok) {
+            signupMessage.textContent = getErrorMessage(data, "Signup failed.");
             return;
         }
 
         showLogin();
-        document.getElementById("loginUsername").value = u;
-        loginMessage.textContent = "Account created.";
-    } catch (e) {
-        signupMessage.textContent = "Network error.";
+        document.getElementById("loginUsername").value = username;
+        loginMessage.textContent = data.first_user_admin
+            ? "Account created. This first account is an admin."
+            : "Account created. You can log in now.";
+    } catch (_) {
+        signupMessage.textContent = "Network error. Check that the backend is running.";
+    }
+}
+
+document.getElementById("openSignup").addEventListener("click", showSignup);
+document.getElementById("openLogin").addEventListener("click", showLogin);
+document.getElementById("loginSubmit").addEventListener("click", login);
+document.getElementById("signupSubmit").addEventListener("click", signup);
+
+document.addEventListener("keydown", function(event) {
+    if (event.key !== "Enter") return;
+
+    if (!loginBox.classList.contains("hidden")) {
+        login();
+    } else if (!signupBox.classList.contains("hidden")) {
+        signup();
     }
 });
 

@@ -3,72 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LocalGPT</title>
-    <meta name="description" content="LocalGPT — Local chat UI with authentication and chat history.">
-    <meta property="og:title" content="LocalGPT">
-    <meta property="og:description" content="LocalGPT — Local chat UI with authentication and chat history.">
-
+    <title>LocalGPT - Local AI Chat with History</title>
+    <meta name="description" content="LocalGPT is a local AI chat web application with authentication, chat history and responsive design.">
+    <meta name="keywords" content="LocalGPT, local AI chat, FastAPI, LM Studio, private chatbot">
+    <meta name="author" content="LocalGPT coursework project">
+    <meta property="og:title" content="LocalGPT - Local AI Chat">
+    <meta property="og:description" content="A local AI chat web application with authentication, chat history and responsive UI.">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#181a1b">
+    <link rel="canonical" href="http://127.0.0.1:8000/">
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<div class="topbar">
+<header class="topbar" role="banner">
     <div class="topbar-title">LocalGPT</div>
-</div>
+    <a class="skip-link" href="#authArea">Skip to login</a>
+</header>
 
-<div class="auth-wrapper">
-    <div class="auth-box" id="loginBox">
-        <h2 class="auth-title">Log in</h2>
+<main class="landing" id="mainContent">
+    <section class="welcome-panel" aria-labelledby="heroTitle">
+        <p class="eyebrow">Private local AI chat</p>
+        <h1 id="heroTitle">A simple chat interface for your LM Studio model</h1>
+        <p class="hero-text">
+            LocalGPT is a coursework project that combines a FastAPI backend, local AI integration,
+            authentication and chat history in one clean interface.
+        </p>
+        <ul class="welcome-list" aria-label="Project highlights">
+            <li><strong>Local model connection:</strong> the backend sends requests to LM Studio.</li>
+            <li><strong>Saved conversations:</strong> chats and messages are stored in SQLite.</li>
+            <li><strong>Clear interface:</strong> responsive layout with keyboard-friendly interaction.</li>
+        </ul>
+        <p class="welcome-note">Built for a private, local workflow without unnecessary complexity.</p>
+    </section>
 
-        <div class="auth-field">
-            <label for="loginUsername">Username</label>
-            <input type="text" id="loginUsername" autocomplete="username">
+    <section class="auth-wrapper" id="authArea" aria-label="Authentication area">
+        <div class="auth-box" id="loginBox">
+            <h2 class="auth-title">Log in</h2>
+
+            <div class="auth-field">
+                <label for="loginUsername">Username</label>
+                <input type="text" id="loginUsername" autocomplete="username" required>
+            </div>
+
+            <div class="auth-field">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" autocomplete="current-password" required>
+            </div>
+
+            <div class="auth-message" id="loginMessage" role="status" aria-live="polite"></div>
+
+            <div class="auth-buttons-row">
+                <button class="btn btn-primary" id="loginSubmit">Log in</button>
+            </div>
+
+            <div class="auth-switch">
+                <span>Do not have an account?</span>
+                <button class="link-btn" id="openSignup" type="button">Sign up</button>
+            </div>
         </div>
 
-        <div class="auth-field">
-            <label for="loginPassword">Password</label>
-            <input type="password" id="loginPassword" autocomplete="current-password">
+        <div class="auth-box hidden" id="signupBox">
+            <h2 class="auth-title">Sign up</h2>
+
+            <div class="auth-field">
+                <label for="signupUsername">Username</label>
+                <input type="text" id="signupUsername" autocomplete="username" required>
+                <small>3-24 characters: letters, numbers and underscore.</small>
+            </div>
+
+            <div class="auth-field">
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword" autocomplete="new-password" required>
+                <small>Minimum 8 characters.</small>
+            </div>
+
+            <div class="auth-message" id="signupMessage" role="status" aria-live="polite"></div>
+
+            <div class="auth-buttons-row">
+                <button class="btn btn-primary" id="signupSubmit">Create account</button>
+            </div>
+
+            <div class="auth-switch">
+                <span>Already have an account?</span>
+                <button class="link-btn" id="openLogin" type="button">Log in</button>
+            </div>
         </div>
-
-        <div class="auth-message" id="loginMessage">placeholder</div>
-
-        <div class="auth-buttons-row">
-            <button class="btn btn-primary" id="loginSubmit">Log in</button>
-        </div>
-
-        <div class="auth-switch">
-            <span>Don't have an account?</span>
-            <button class="link-btn" id="openSignup">Sign up</button>
-        </div>
-    </div>
-
-    <div class="auth-box hidden" id="signupBox">
-        <h2 class="auth-title">Sign up</h2>
-
-        <div class="auth-field">
-            <label for="signupUsername">Username</label>
-            <input type="text" id="signupUsername" autocomplete="username">
-        </div>
-
-        <div class="auth-field">
-            <label for="signupPassword">Password</label>
-            <input type="password" id="signupPassword" autocomplete="new-password">
-        </div>
-
-        <div class="auth-message" id="signupMessage">placeholder</div>
-
-        <div class="auth-buttons-row">
-            <button class="btn btn-primary" id="signupSubmit">Create account</button>
-        </div>
-
-        <div class="auth-switch">
-            <span>Already have an account?</span>
-            <button class="link-btn" id="openLogin">Log in</button>
-        </div>
-    </div>
-</div>
+    </section>
+</main>
 
 <script src="/static/script.js"></script>
-
 </body>
 </html>
