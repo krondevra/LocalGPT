@@ -1,7 +1,8 @@
 import os
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Form
-from passlib.context import CryptContext
+from fastapi.security import OAuth2PasswordBearer
+import bcrypt
 from jose import jwt
 from sqlalchemy.orm import Session
 from .database import get_db, User
@@ -12,13 +13,46 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # jwt secret key (REPLACE!)
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-key")
 ALGO = "HS256"
-crypt = CryptContext(["pbkdf2_sha256"], deprecated="auto")
+MAX_BCRYPT_LEN = 72
+
+# used by /me
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+# -------------------- bcrypt helpers --------------------
+
+def hash_password(password: str) -> str:
+    pwd = password[:MAX_BCRYPT_LEN].encode()
+    hashed = bcrypt.hashpw(pwd, bcrypt.gensalt())
+    return hashed.decode()
+
+def verify_password(password: str, hashed: str) -> bool:
+    pwd = password[:MAX_BCRYPT_LEN].encode()
+    return bcrypt.checkpw(pwd, hashed.encode())
 
 # --------------------- JWT helpers ----------------------
 
 def make_token(name: str) -> str:
     exp = datetime.now(timezone.utc) + timedelta(hours=1)
     return jwt.encode({"sub": name, "exp": int(exp.timestamp())}, SECRET_KEY, ALGO)
+
+def current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+    try:
+        data = jwt.decode(token, SECRET_KEY, [ALGO])
+        name = data.get("sub")
+        if not name:
+            raise Exception
+    except:
+        raise HTTPException(401, "bad token")
+
+    u = db.query(User).filter_by(username=name).first()
+    if not u:
+        raise HTTPException(401, "no user")
+    return u
+
+def admin_user(u: User = Depends(current_user)) -> User:
+    if not u.is_admin:
+        raise HTTPException(403, "for admin")
+    return u
 
 # ---------------------- Auth routes ---------------------
 
@@ -32,10 +66,12 @@ def register(username: str = Form(""), password: str = Form(""), db: Session = D
         raise HTTPException(409, "taken")
 
     # save user
+    # count users to detect first one
+    c = db.query(User).count()
     db.add(User(
         username=username,
-        password_hash=crypt.hash(password),
-        is_admin=False
+        password_hash=hash_password(password),
+        is_admin=(c == 0)
     ))
     db.commit()
     return {"ok": 1, "user": username}
@@ -50,7 +86,16 @@ def login(username: str = Form(""), password: str = Form(""), db: Session = Depe
     u = db.query(User).filter_by(username=username).first()
 
     # password check
-    if not u or not crypt.verify(password, u.password_hash):
+    if not u or not verify_password(password, u.password_hash):
         raise HTTPException(401, "no access")
 
-    return {"access_token": make_token(username), "token": 1}
+    return {"access_token": make_token(username), "token_type": "bearer"}
+
+@router.get("/me")
+def me(u: User = Depends(current_user)):
+    return {"name": u.username, "admin": u.is_admin}
+
+@router.get("/list")
+def list_users(_: User = Depends(admin_user), db: Session = Depends(get_db)):
+    users = db.query(User).order_by(User.id.asc()).all()
+    return [{"id": u.id, "name": u.username, "admin": u.is_admin} for u in users]
