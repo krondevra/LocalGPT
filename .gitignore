@@ -1,0 +1,10 @@
+.tmp/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+app/localgpt.db
+.env
+.env.txt
+.DS_Store
+.claude/
