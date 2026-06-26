@@ -2,6 +2,8 @@
 
 LocalGPT is a local AI chat web app built with FastAPI, SQLite, and a static frontend. It provides user registration, JWT login, per-user chat history, admin user management, and an LM Studio/OpenAI-compatible chat backend.
 
+![Demo](assets/demo.gif)
+
 ## Features
 
 - FastAPI backend with static frontend serving
