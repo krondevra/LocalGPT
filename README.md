@@ -89,4 +89,4 @@ The first registered user becomes an admin.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[MIT License](LICENSE) © 2026 Devids Kronbergs.
